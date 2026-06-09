@@ -639,18 +639,37 @@
           </div>
         </div>
         <!-- Exit anims -->
-        <div class="demo-chip">// Exit animations</div>
+        <div class="demo-chip">// Exit animations (Click to test exit motion)</div>
         <div class="ease-flex ease-flex-wrap ease-gap-6">
+          
           <div class="anim-cell">
-            <div class="ease-expand-border-exit" onclick="replay(this,'ease-expand-border-exit')" style="width:64px;
-          height:64px;
-          border:2px solid #a78bfa;
-          border-radius:12px;
-          cursor:pointer;"></div>
-            <span class="tag">ease-expand-border-exit</span>
-
+            <div class="anim-box" onclick="replay(this,'ease-fade-out')">
+              <span style="pointer-events: none;">◌</span>
+            </div>
+            <span class="tag">ease-fade-out</span>
           </div>
-        </div>
+
+          <div class="anim-cell">
+            <div class="anim-box" onclick="replay(this,'ease-slide-down')">
+              <span style="pointer-events: none;">↓</span>
+            </div>
+            <span class="tag">ease-slide-down</span>
+          </div>
+
+          <div class="anim-cell">
+            <div class="anim-box" onclick="replay(this,'ease-zoom-out')">
+              <span style="pointer-events: none;">⊖</span>
+            </div>
+            <span class="tag">ease-zoom-out</span>
+          </div>
+
+          <div class="anim-cell">
+            <div class="anim-box" onclick="replay(this,'ease-expand-border-exit')">
+              <span style="pointer-events: none;">⤢</span>
+            </div>
+            <span class="tag">ease-expand-border-exit</span>
+          </div>
+        </div>     
       </div>
     </section>
 
@@ -711,6 +730,7 @@
     </section>
 
   </main>
+  
 
   <!-- ═══════════════════════════════════════════════════════
        FOOTER
@@ -727,48 +747,46 @@
   <!-- ── Scripts ────────────────────────────────────────── -->
   <script>
     function replay(el, cls) {
+      // 1. Reset any leftover layout states before running a new animation
       el.classList.remove(cls);
-      void el.offsetWidth; // force reflow
+      el.style.opacity = "";
+      el.style.transform = ""; 
+      
+      // 2. Force a browser repaint so the reset registers instantly
+      void el.offsetWidth; 
+      
+      // 3. Inject the framework utility class to fire the animation
       el.classList.add(cls);
+
+      // 4. Sandbox Safety Reset: Once the exit animation finishes running, 
+      // automatically strip it so the test block doesn't stay hidden!
+      el.addEventListener('animationend', function handler() {
+        el.classList.remove(cls);
+        el.style.opacity = "1";
+        el.style.transform = "none";
+        el.removeEventListener('animationend', handler);
+      }, { once: true });
     }
 
-    // ScrollSpy Logic
+    // ScrollSpy Navigation Logic (Keeps your header highlight sync running perfectly)
     document.addEventListener("DOMContentLoaded", () => {
       const sections = document.querySelectorAll("section.demo-section");
       const navLinks = document.querySelectorAll(".demo-nav-links a[href^='#']");
-
-      const observerOptions = {
-        root: null,
-        rootMargin: "-10% 0px -55% 0px",
-        threshold: 0
-      };
+      const observerOptions = { root: null, rootMargin: "-10% 0px -55% 0px", threshold: 0 };
 
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const id = entry.target.getAttribute("id");
-                navLinks.forEach(link => {
-                    link.classList.remove("active");
-                    if (link.getAttribute("href") === `#${id}`) {
-                        link.classList.add("active");
-                    }
-                });
-            }
+          if (entry.isIntersecting) {
+            const id = entry.target.getAttribute("id");
+            navLinks.forEach(link => {
+              link.classList.remove("active");
+              if (link.getAttribute("href") === `#${id}`) { link.classList.add("active"); }
+            });
+          }
         });
       }, observerOptions);
-
       sections.forEach(sec => observer.observe(sec));
-
-      // Click event for immediate feedback
-      navLinks.forEach(link => {
-          link.addEventListener("click", function() {
-              navLinks.forEach(a => a.classList.remove("active"));
-              this.classList.add("active");
-          });
-      });
     });
   </script>
-
 </body>
-
 </html>
